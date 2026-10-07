@@ -10,15 +10,15 @@
 #include <vector>
 
 // ---------- Settings ----------
-const int GRID_W   = 30;                 // board size in cells
-const int GRID_H   = 20;
-const int CELL     = 24;                 // size of one cell in pixels
-const int HUD_H    = 60;                 // space above the board for the score
+const int GRID_W = 30;                 // board size in cells
+const int GRID_H = 20;
+const int CELL = 24;                 // size of one cell in pixels
+const int HUD_H = 60;                 // space above the board for the score
 const int SCREEN_W = GRID_W * CELL;
 const int SCREEN_H = GRID_H * CELL + HUD_H;
 
 const float START_DELAY = 0.12f;         // seconds between moves
-const float MIN_DELAY   = 0.05f;
+const float MIN_DELAY = 0.05f;
 
 // ---------- Types ----------
 struct Point {
@@ -30,8 +30,8 @@ enum class Dir { Left, Right, Up, Down };
 enum class State { Playing, Paused, GameOver, Won };
 
 bool isOpposite(Dir a, Dir b) {
-    return (a == Dir::Left  && b == Dir::Right) || (a == Dir::Right && b == Dir::Left) ||
-           (a == Dir::Up    && b == Dir::Down)  || (a == Dir::Down  && b == Dir::Up);
+    return (a == Dir::Left && b == Dir::Right) || (a == Dir::Right && b == Dir::Left) ||
+        (a == Dir::Up && b == Dir::Down) || (a == Dir::Down && b == Dir::Up);
 }
 
 // ---------- Game ----------
@@ -41,9 +41,9 @@ public:
 
     void reset() {
         snake.clear();
-        snake.push_back({GRID_W / 2,     GRID_H / 2});
-        snake.push_back({GRID_W / 2 - 1, GRID_H / 2});
-        snake.push_back({GRID_W / 2 - 2, GRID_H / 2});
+        snake.push_back({ GRID_W / 2,     GRID_H / 2 });
+        snake.push_back({ GRID_W / 2 - 1, GRID_H / 2 });
+        snake.push_back({ GRID_W / 2 - 2, GRID_H / 2 });
         lastMoved = Dir::Right;
         queued.clear();
         score = 0;
@@ -58,7 +58,7 @@ public:
             return;
         }
 
-        if (IsKeyPressed(KEY_P)) {
+        if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_SPACE)) {
             state = (state == State::Paused) ? State::Playing : State::Paused;
         }
         if (state == State::Paused) return;
@@ -67,6 +67,12 @@ public:
         if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN))  queueDir(Dir::Down);
         if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))  queueDir(Dir::Left);
         if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) queueDir(Dir::Right);
+    }
+
+    // Called when the window loses focus, so the snake doesn't keep
+    // moving while you're looking at something else.
+    void pauseIfPlaying() {
+        if (state == State::Playing) state = State::Paused;
     }
 
     void update(float dt) {
@@ -81,7 +87,7 @@ public:
     }
 
     void draw() const {
-        ClearBackground(Color{24, 26, 32, 255});
+        ClearBackground(Color{ 24, 26, 32, 255 });
 
         // HUD
         DrawText(TextFormat("Score: %d", score), 16, 16, 28, RAYWHITE);
@@ -91,26 +97,26 @@ public:
         // Board (checkerboard)
         for (int y = 0; y < GRID_H; y++) {
             for (int x = 0; x < GRID_W; x++) {
-                Color c = ((x + y) % 2 == 0) ? Color{36, 40, 50, 255} : Color{32, 35, 44, 255};
+                Color c = ((x + y) % 2 == 0) ? Color{ 36, 40, 50, 255 } : Color{ 32, 35, 44, 255 };
                 DrawRectangle(x * CELL, HUD_H + y * CELL, CELL, CELL, c);
             }
         }
 
         // Food
         DrawCircle(food.x * CELL + CELL / 2, HUD_H + food.y * CELL + CELL / 2,
-                   CELL * 0.38f, Color{235, 70, 70, 255});
+            CELL * 0.38f, Color{ 235, 70, 70, 255 });
 
         // Snake
         for (size_t i = snake.size(); i-- > 0;) {
-            Rectangle r = {(float)(snake[i].x * CELL + 1), (float)(HUD_H + snake[i].y * CELL + 1),
-                           (float)(CELL - 2), (float)(CELL - 2)};
-            Color c = (i == 0) ? Color{120, 230, 120, 255} : Color{60, 180, 90, 255};
+            Rectangle r = { (float)(snake[i].x * CELL + 1), (float)(HUD_H + snake[i].y * CELL + 1),
+                           (float)(CELL - 2), (float)(CELL - 2) };
+            Color c = (i == 0) ? Color{ 120, 230, 120, 255 } : Color{ 60, 180, 90, 255 };
             DrawRectangleRounded(r, 0.35f, 6, c);
         }
 
         // Overlays
         if (state == State::Paused)
-            drawOverlay("PAUSED", "Press P to resume");
+            drawOverlay("PAUSED", "Press P or Space to resume");
         else if (state == State::GameOver)
             drawOverlay("GAME OVER", "Press Enter to play again");
         else if (state == State::Won)
@@ -120,7 +126,7 @@ public:
 private:
     std::deque<Point> snake;        // snake[0] is the head
     std::deque<Dir> queued;         // buffered turns, so fast key taps aren't lost
-    Point food{0, 0};
+    Point food{ 0, 0 };
     Dir lastMoved = Dir::Right;
     State state = State::Playing;
     int score = 0;
@@ -144,7 +150,7 @@ private:
         std::vector<Point> freeCells;
         for (int y = 0; y < GRID_H; y++)
             for (int x = 0; x < GRID_W; x++) {
-                Point p{x, y};
+                Point p{ x, y };
                 if (std::find(snake.begin(), snake.end(), p) == snake.end())
                     freeCells.push_back(p);
             }
@@ -164,10 +170,10 @@ private:
 
         Point head = snake.front();
         switch (dir) {
-            case Dir::Left:  head.x--; break;
-            case Dir::Right: head.x++; break;
-            case Dir::Up:    head.y--; break;
-            case Dir::Down:  head.y++; break;
+        case Dir::Left:  head.x--; break;
+        case Dir::Right: head.x++; break;
+        case Dir::Up:    head.y--; break;
+        case Dir::Down:  head.y++; break;
         }
 
         // Wall collision
@@ -194,16 +200,17 @@ private:
             score += 10;
             highScore = std::max(highScore, score);
             if (!spawnFood()) state = State::Won;
-        } else {
+        }
+        else {
             snake.pop_back();
         }
     }
 
     void drawOverlay(const char* title, const char* hint) const {
-        DrawRectangle(0, HUD_H, SCREEN_W, GRID_H * CELL, Color{0, 0, 0, 160});
+        DrawRectangle(0, HUD_H, SCREEN_W, GRID_H * CELL, Color{ 0, 0, 0, 160 });
         int cy = HUD_H + (GRID_H * CELL) / 2;
         DrawText(title, (SCREEN_W - MeasureText(title, 56)) / 2, cy - 50, 56, RAYWHITE);
-        DrawText(hint,  (SCREEN_W - MeasureText(hint, 24)) / 2,  cy + 20, 24, LIGHTGRAY);
+        DrawText(hint, (SCREEN_W - MeasureText(hint, 24)) / 2, cy + 20, 24, LIGHTGRAY);
     }
 };
 
@@ -215,6 +222,8 @@ int main() {
     Game game;
 
     while (!WindowShouldClose()) {      // Esc or the close button quits
+        if (!IsWindowFocused()) game.pauseIfPlaying();   // auto-pause
+
         game.handleInput();
         game.update(GetFrameTime());
 
