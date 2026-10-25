@@ -20,11 +20,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(raylib)
 
-add_executable(snake main.cpp)
+# On Windows, snake.rc embeds snake.ico into snake.exe. That gives the file
+# its icon in File Explorer, and the game window and taskbar use it too.
+set(SNAKE_SOURCES main.cpp)
+if (WIN32)
+    enable_language(RC)
+    list(APPEND SNAKE_SOURCES snake.rc)
+endif()
+
+add_executable(snake ${SNAKE_SOURCES})
 target_link_libraries(snake PRIVATE raylib)
 
-# In Release builds, hide the black console window behind the game.
-# (Debug builds keep it, so you can still see Raylib's log messages.)
 # In non-Debug builds (Release, RelWithDebInfo), hide the black console window.
 # (Debug builds keep it, so you can still see Raylib's log messages.)
 if (MSVC)
